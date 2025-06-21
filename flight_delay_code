@@ -1,0 +1,92 @@
+## 📌 1. SQL Queries
+
+### 1.1 Weekday vs Weekend Flight Count
+```sql
+SELECT 
+    CASE 
+        WHEN DAY_OF_WEEK IN (6, 7) THEN 'Weekend'
+        ELSE 'Weekday'
+    END AS Day_Type,
+    COUNT(*) AS Total_Flights
+FROM flights
+GROUP BY Day_Type;
+```
+
+### 1.2 Cancelled JetBlue Flights on 1st of Each Month
+```sql
+SELECT 
+    YEAR, MONTH, DAY, AIRLINE, COUNT(*) AS Cancelled_Count
+FROM flights
+WHERE AIRLINE = 'B6' AND CANCELLED = 1 AND DAY = 1
+GROUP BY YEAR, MONTH, DAY, AIRLINE;
+```
+
+### 1.3 Airlines with No Delays and Distance 2500–3000
+```sql
+SELECT DISTINCT AIRLINE
+FROM flights
+WHERE DEPARTURE_DELAY = 0 AND ARRIVAL_DELAY = 0 AND DISTANCE BETWEEN 2500 AND 3000;
+```
+
+---
+
+## 📊 2. Excel Formulas
+
+### 2.1 Weekday Labeling
+```excel
+=IF(OR(WEEKDAY(A2)=1,WEEKDAY(A2)=7), "Weekend", "Weekday")
+```
+
+### 2.2 Count Cancelled JetBlue Flights (Pivot Filter: Day=1, Airline=B6)
+- Use `COUNTIF` or calculated field in Pivot Table.
+
+---
+
+## 📈 3. Power BI DAX Measures
+
+### 3.1 Weekday vs Weekend
+```DAX
+DayType = IF(WEEKDAY('flights'[DATE], 2) > 5, "Weekend", "Weekday")
+```
+
+### 3.2 Total Flights by DayType
+```DAX
+Total Flights = COUNTROWS('flights')
+```
+
+### 3.3 Airlines with No Delay and Distance Range
+```DAX
+NoDelayAirlines = 
+CALCULATETABLE(
+    VALUES('flights'[AIRLINE]),
+    'flights'[DEPARTURE_DELAY] = 0,
+    'flights'[ARRIVAL_DELAY] = 0,
+    'flights'[DISTANCE] >= 2500 && 'flights'[DISTANCE] <= 3000
+)
+```
+
+---
+
+## 📉 4. Tableau Calculated Fields
+
+### 4.1 Weekday/Weekend
+```tableau
+IF DATEPART('weekday', [Date]) = 1 OR DATEPART('weekday', [Date]) = 7 THEN "Weekend" ELSE "Weekday" END
+```
+
+### 4.2 Cancelled JetBlue Flights
+```tableau
+IF [Airline] = "JetBlue Airways" AND DAY([Date]) = 1 AND [Cancelled] = 1 THEN 1 ELSE 0 END
+```
+
+### 4.3 Airlines with No Delay and Distance Filter
+Use Filters:
+- `Departure Delay = 0`
+- `Arrival Delay = 0`
+- `Distance between 2500 and 3000`
+
+---
+
+## 🧠 Notes
+- Dates in Excel and Tableau must be parsed/converted if stored as separate columns (YEAR, MONTH, DAY).
+- Join airline and airport metadata using common keys (IATA codes).
